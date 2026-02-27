@@ -38,5 +38,5 @@ Structured approach to bias mitigation, hallucination control, and lifecycle mon
 ---
 
 Connect  
-- [LinkedIn](https://www.linkedin.com/in/aayush-bhat-6841b4127/))  
+- [LinkedIn](https://www.linkedin.com/in/aayush-bhat-6841b4127/)  
 - [GitHub](https://github.com/aayush19973636)
