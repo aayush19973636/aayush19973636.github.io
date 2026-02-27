@@ -2,91 +2,265 @@
 
 ## Executive Summary
 
-This program outlines the end-to-end deployment of a conversational AI assistant designed to replace rigid menu-based support workflows. The objective is to improve CSAT, reduce misclassification, and enable scalable automation while maintaining safety and reliability.
+This program outlines the end-to-end deployment of a conversational AI assistant designed to replace rigid menu-based support workflows. The objective is to improve CSAT, reduce misclassification, and enable scalable automation while maintaining strict safety, reliability, and cost controls.
+
+The focus is not only model quality, but safe production integration, measurable impact, and operational resilience.
 
 ---
 
 ## 1. Business Problem
 
 Users currently navigate structured automation menus to resolve issues. This leads to:
+
 - High cognitive load
 - Incorrect category selection
-- Increased escalations
+- Increased agent escalations
 - Lower perceived personalization
+- Slower resolution time
 
-Goal:
-Improve support experience while maintaining strict safety and compliance guardrails.
+### Objective
+
+Deploy a conversational AI assistant that:
+
+- Accepts free-text queries
+- Accurately identifies user intent
+- Executes structured workflows safely
+- Improves support quality without increasing operational risk
+
+Success is measured by:
+
+- CSAT uplift
+- Reduced misclassification rate
+- Lower escalation rate
+- Stable or improved resolution time
+- No increase in safety incidents
 
 ---
 
 ## 2. Architecture Overview
 
-High-Level Flow:
+### High-Level Flow
 
 User Query  
-→ Intent Classification  
+→ Intent Classification Layer  
 → Safety Filter  
-→ Retrieval Layer (Knowledge Grounding)  
+→ Retrieval Layer (Knowledge Grounding / RAG)  
 → LLM Response Generation  
-→ Workflow Trigger  
-→ Logging & Monitoring
+→ Workflow Execution  
+→ Logging & Monitoring  
+
+### Core Components
+
+- Lightweight intent classifier for routing
+- Safety classifier for high-risk categories
+- Retrieval-Augmented Generation (RAG) for domain grounding
+- LLM inference layer (API-based initially)
+- Observability & metrics pipeline
+- Feedback capture loop
 
 ---
 
 ## 3. Model Strategy
 
-Initial approach:
-- API-based LLM for rapid iteration
-- Prompt engineering with structured templates
-- Retrieval-Augmented Generation (RAG) for domain grounding
+### Initial Phase
 
-Fine-tuning deferred until sufficient production data is collected.
+- Use API-based LLM for rapid iteration
+- Prompt engineering with structured system instructions
+- Retrieval-based knowledge injection for grounding
 
----
+Fine-tuning is deferred until sufficient production data is collected.
 
-## 4. Rollout Strategy
+### Rationale
 
-Phase 1: Internal testing  
-Phase 2: 1–5% traffic (low-risk categories only)  
-Phase 3: Gradual ramp with defined rollback triggers  
+Prompt + RAG allows:
 
-Rollback triggers:
-- CSAT drop > X%
-- Escalation increase > Y%
-- Latency breach > SLA threshold
+- Faster iteration cycles
+- Lower maintenance overhead
+- Reduced infra complexity
+- Easier rollback strategy
 
----
+Fine-tuning is considered only if:
 
-## 5. Guardrails & Risk Mitigation
-
-- Safety classifier for high-risk categories
-- Confidence threshold before workflow execution
-- Human override via “agent” keyword
-- Real-time monitoring of hallucination and misrouting rate
+- Hallucination rate remains high
+- Domain-specific tone requires deeper customization
+- Cost efficiency improves with internal hosting
 
 ---
 
-## 6. Monitoring Framework
+## 4. Offline Evaluation Framework
 
-Key Metrics:
-- CSAT delta
-- Escalation rate
+Before any production rollout, the system is evaluated using historical support data.
+
+### Offline Metrics
+
 - Intent classification accuracy
+- Resolution correctness score
 - Hallucination rate
-- p50 / p95 latency
-- Cost per request
+- Toxicity detection rate
+- Confidence calibration accuracy
+- Median and p95 latency benchmark
+
+Acceptance criteria must be defined prior to experimentation.
 
 ---
 
-## 7. Scalability & Cost Considerations
+## 5. Rollout Strategy
 
-- Token usage optimization
-- Caching common queries
-- Autoscaling inference layer
-- Transition to self-hosted model at scale if cost thresholds exceeded
+### Phase 1 – Internal Testing
+- Employee dogfooding
+- Validate stability and safety
+- Manual review of outputs
+
+### Phase 2 – 1–5% Traffic
+- Low-risk issue categories only
+- Exclude safety-sensitive cases
+- Real-time monitoring enabled
+
+### Phase 3 – Controlled Ramp (5% → 20% → 50%)
+- Expand coverage gradually
+- Maintain defined rollback triggers
+
+### Phase 4 – Full Rollout
+- Continuous monitoring
+- Weekly performance review cadence
+
+### Rollback Triggers
+
+- CSAT drop > predefined threshold
+- Escalation rate increase > threshold
+- Hallucination rate breach
+- Latency breach of SLO
+- Safety misrouting detected
+
+---
+
+## 6. Guardrails & Risk Mitigation
+
+AI systems introduce probabilistic behavior and require strict guardrails.
+
+### Guardrail Mechanisms
+
+- Safety classification layer before LLM execution
+- Confidence threshold before workflow automation
+- Mandatory human routing for:
+  - Fraud
+  - Legal issues
+  - Harassment
+  - Sensitive financial disputes
+
+- User override via explicit “agent” keyword
+- Rate limiting to prevent abuse
+
+---
+
+## 7. Monitoring & Observability
+
+Production deployment requires structured monitoring across quality, reliability, and cost.
+
+### Quality Metrics
+
+- CSAT delta
+- Contact rate
+- Escalation rate
+- Intent misclassification rate
+- Hallucination frequency
+
+### Reliability Metrics
+
+- p50 / p95 latency
+- API error rate
+- Dependency failure rate
+- Timeout frequency
+
+### Cost Metrics
+
+- Token usage per request
+- Cost per 1K tokens
+- Traffic volume trends
+- Model usage distribution
+
+All dashboards must support real-time alerts and baseline comparison.
+
+---
+
+## 8. Tradeoff Analysis
+
+### Latency vs Model Quality
+
+Larger models may improve response quality but introduce:
+
+- Increased inference latency
+- Higher infrastructure cost
+- Potential SLA breaches
+
+Decision framework:
+
+- If CSAT uplift > threshold and latency remains within SLO, optimize infra.
+- If latency breaches SLA and degrades UX, rollback and optimize model size or caching strategy.
+
+---
+
+### Cost vs Scalability
+
+Primary cost drivers:
+
+- Token usage
+- Traffic volume
+- Hosting model (API vs self-hosted GPU)
+
+Mitigation strategies:
+
+- Cache repeated intents
+- Use smaller model for low-risk queries
+- Escalate to larger model only for complex cases
+- Evaluate hybrid routing architecture
+
+---
+
+## 9. Incident Response & Failure Handling
+
+AI systems require structured incident management.
+
+### Potential Failure Modes
+
+- Incorrect intent classification
+- Hallucinated responses
+- Latency spikes under traffic surge
+- Safety filter bypass
+- External API outage
+
+### Containment Strategy
+
+- Immediate rollback to baseline rule-based workflow
+- Disable automated execution layer
+- Trigger alert to on-call ML/Platform team
+
+### Post-Incident Actions
+
+- Root cause analysis (model behavior vs infra vs data issue)
+- Prompt refinement or classifier retraining
+- Update evaluation dataset with failure cases
+- Guardrail recalibration
+
+---
+
+## 10. Long-Term Governance
+
+AI systems degrade over time without structured oversight.
+
+### Ongoing Practices
+
+- Weekly model performance review
+- Monthly drift detection analysis
+- Continuous dataset enrichment
+- Structured feedback ingestion
+- Evaluation framework updates
 
 ---
 
 ## Key Takeaways
 
-Successful AI deployment requires structured rollout, strict guardrails, and continuous monitoring. The focus is not just model accuracy, but safe and scalable integration into production systems.
+Deploying AI systems requires more than model accuracy.  
+Success depends on structured rollout, strict guardrails, measurable experimentation, and operational governance.
+
+The objective is safe, scalable AI integration into production — not just intelligent responses.
